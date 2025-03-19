@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useDebounce from "../hooks/useDebounce";
 import Trie from "../utils/trie";
 
@@ -8,8 +8,8 @@ const UserSearch = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
-  // Trie for efficient search
-  const trie = new Trie();
+  // Use useRef to persist Trie instance across renders
+  const trieRef = useRef(new Trie());
 
   // Fetch user data with native fetch API
   useEffect(() => {
@@ -23,8 +23,10 @@ const UserSearch = () => {
         // Set user data and populate Trie
         setUsers(data);
         setFilteredUsers(data);
+
+        // Populate Trie only once after data is fetched
         data.forEach((user) => {
-          trie.insert(user.name.toLowerCase());
+          trieRef.current.insert(user.name.toLowerCase());
         });
       } catch (error) {
         console.error("Error fetching users:", error);
